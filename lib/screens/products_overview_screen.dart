@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:shop_app/providers/cart.dart';
-import 'package:shop_app/screens/cart_screen.dart';
-import 'package:shop_app/widgets/app_drawer.dart';
-import 'package:shop_app/widgets/badge.dart';
-import '../widgets/products_grid.dart';
 import 'package:provider/provider.dart';
+import 'package:shop_app/providers/products.dart';
+
+import '../widgets/app_drawer.dart';
+import '../widgets/products_grid.dart';
+import '../widgets/badge.dart';
+import '../providers/cart.dart';
+import './cart_screen.dart';
 
 enum FilterOptions {
   Favorites,
@@ -18,10 +20,30 @@ class ProductsOverviewScreen extends StatefulWidget {
 
 class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   var _showOnlyFavorites = false;
+  var _isInit = true;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    //through this a[[roach context can be accessed...............
+//    Future.delayed(Duration.zero).then((_){
+//      Provider.of<Products>(context).fetchProducts();
+//    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+    if(_isInit){
+      Provider.of<Products>(context).fetchProducts();
+    }
+    _isInit = false;
+  }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: Text('MyShop'),
@@ -51,21 +73,23 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
                 ],
           ),
           Consumer<Cart>(
-            builder: (_,cart,childUnchanged) =>  Badge(
-              child: childUnchanged,
-              value: cart.itemCount.toString(),
-            ),
+            builder: (_, cart, ch) => Badge(
+                  child: ch,
+                  value: cart.itemCount.toString(),
+                ),
             child: IconButton(
-              onPressed: (){
+              icon: Icon(
+                Icons.shopping_cart,
+              ),
+              onPressed: () {
                 Navigator.of(context).pushNamed(CartScreen.routeName);
               },
-              icon: Icon(Icons.shopping_cart),),
-          )
-
+            ),
+          ),
         ],
       ),
-      body: ProductsGrid(_showOnlyFavorites),
       drawer: AppDrawer(),
+      body: ProductsGrid(_showOnlyFavorites),
     );
   }
 }
